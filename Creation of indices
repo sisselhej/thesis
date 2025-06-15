@@ -1,0 +1,158 @@
+pwcorr fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms, obs sig bonferroni
+
+
+			//PCA 
+pca fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms, mineigen(1)
+
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+screeplot, yline(1)
+
+loadingplot
+
+			////PCA per country ///// 
+
+*scandinavia:
+pca fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms if cntry=="SE", mineigen(1)
+
+
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+pca fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms if cntry=="NO", mineigen(1)
+
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+pca fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms if cntry=="FI", mineigen(1)
+
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+pca fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms if cntry=="DK", mineigen(1)
+
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+*continental
+pca  fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms  if cntry=="AT", mineigen(1)
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+pca  fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms  if cntry=="BE", mineigen(1)
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+pca  fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms  if cntry=="FR", mineigen(1)
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+pca  fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms  if cntry=="GB", mineigen(1)
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+pca  fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms  if cntry=="PL", mineigen(1)
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+*south:
+pca  fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms  if cntry=="ES", mineigen(1)
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+pca  fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms  if cntry=="PT", mineigen(1)
+rotate, varimax blanks(.3) /* Hides small loadings, eases interpretation. */
+
+*Overall depression index 
+
+alpha fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng enrglot enjlf wrhpp flrms
+
+ta fltdpr //negative
+ta fltsd //negative
+ta fltlnl //negative
+ta flttrd //negative
+ta slprl //sleep restless /negative
+ta optftr //disagree that they are optimistic /negative
+ta pstvms 
+ta lfcllk //disagree that they like life /negative
+ta dclvlf //disagree that they decide how to live life/negative
+ta absddng //absorbed all the time /positive
+ta enrglot //lot of energy all the time /positive
+ta enjlf //enjoy life all the time /positive
+ta wrhpp //all the time happy /positive
+ta flrms //Disagree strongly with feeling as a failure /positive
+
+
+//revert so higher means more negative!
+gen absddng_n = 4 - absddng
+gen enrglot_n = 4 - enrglot
+gen enjlf_n = 4 - enjlf
+gen wrhpp_n = 4 - wrhpp
+gen flrms_n = 5 - flrms
+
+gen dep = (fltdpr + fltsd + fltlnl + flttrd + slprl +optftr + pstvms + lfcllk + dclvlf + absddng_n + enrglot_n + enjlf_n + wrhpp_n + flrms_n) / 14
+
+egen dep = rowmean(fltdpr fltsd fltlnl flttrd slprl optftr pstvms lfcllk dclvlf absddng_n enrglot_n enjlf_n wrhpp_n flrms_n)
+gen log_dep = log(dep + 0.1)
+
+kdensity log_dep, lwidth(medthick)
+tab dep
+
+drop min max
+egen min = min(dep)
+egen max = max(dep)
+gen dep_10 = (dep - min) / (max - min) * 10
+
+mixed dep_10 || cntry:
+estat icc
+
+*INDEX 1 
+
+alpha fltdpr fltsd fltlnl flttrd slprl /*0.56*/
+
+
+*Create index, as they have the same categories:
+gen index = (fltdpr + fltsd + fltlnl + flttrd + slprl) / 5
+
+*change index, so it's from 0 to 10.
+drop min max
+egen min = min(index)
+egen max = max(index)
+gen index_1 = (index - min) / (max - min) * 10
+
+mixed index_1 || cntry:
+estat icc
+
+rename index_1 heavy
+
+
+*INDEX 2 
+
+alpha  optftr pstvms lfcllk dclvlf flrms_n /*0.47*/
+gen index2 = (optftr + pstvms + lfcllk + dclvlf + flrms_n) / 5
+
+drop min max
+egen min = min(index2)
+egen max = max(index2)
+gen index2_10 = (index2 - min) / (max - min) * 10
+
+mixed index2_10 || cntry:
+estat icc
+
+rename index2_10 negativeoutlook
+
+
+*INDEX 3 
+
+alpha  absddng_n enrglot_n enjlf_n wrhpp_n  /*0.69*/
+
+
+*invert variables where higher means more negative
+
+
+gen index3 = (absddng_n + enrglot_n + enjlf_n + wrhpp_n) / 4
+
+drop min max
+egen min = min(index3)
+egen max = max(index3)
+gen index3_10 = (index3 - min) / (max - min) * 10
+
+mixed index3_10 || cntry:
+estat icc
+
+rename index3_10 anhedonia
+
+//DECRIPTIVE STATISTICS
+tabstat dep gndr agea edulvla edulvlfa edulvlma hinctnt, stats(mean sd n) columns(variables)
+
+misstable summarize badconditions distrust exhaustion pessimism depression gndr agea edulvla edulvlfa edulvlma hinctnt
